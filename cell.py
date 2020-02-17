@@ -6,6 +6,7 @@ class Agent():
     @classmethod
     def __init__(self,dnk,position,):
         self.position = position
+        grid.
         self.dnk = dnk
         encode(dnk)
         # self.speed
@@ -14,6 +15,7 @@ class Agent():
         # self.hunger
         self.energy = 100
 
+    @classmethod
     def encode(dnk):
         self.max_energy = 100
         self.max_speed = 1
@@ -22,7 +24,10 @@ class Agent():
         self.max_age = 100
         self.max_reproduction = 3
 
+    @classmethod
     def move((dx,dy)):
         pass
+
+    @classmethod
     def eat(food):
         pass

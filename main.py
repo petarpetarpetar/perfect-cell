@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import pygame
-
-import pygame
 import math
 import time
+
+
+
 
 def create_background(width, height):
         colors = [(255, 255, 255), (212, 212, 212)]
