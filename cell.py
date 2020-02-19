@@ -2,6 +2,7 @@
 
 from enum import ENUM
 import random
+import math
 #enable debug mode in order to get useful prints prints
 _debugMode = False
 
@@ -19,7 +20,8 @@ class state(ENUM):
 class Cell():
 
     # @brief constructor for when a new cell is generated at the beggining of simulation (random gen era)
-    def __init__(position, dnk):
+    def __init__(position, dnk, id):
+        self.id = id                        #id of a cell in order to keep track of numbers and identifying the cells
         self.position = position            #current position of the cell
         self.dnk = dnk                      #dnk sequence of a cell
         self.age = 0                        #age of a cell (how much cycles it has lived)
@@ -130,6 +132,10 @@ class Cell():
 
 
     def update():
+
+        def calculateDistance(a,b):
+            return math.sqrt(abs(a[0]-b[0])**2 + abs(a[1] - b[1]) ** )
+            
         if self.cellState = state.SEARCING4FOOD:
             seedDirection = random.randint(1,4)
             seedDistance = random.randint(0,self.speed)
@@ -144,8 +150,43 @@ class Cell():
             
             elif seedDirection == 4: 
                 move((0,(-1)*self.speed))
+            
+            ###SCAN
+            world_cellList = []
+            world_foodList = []
+            if self.state = state.SEARCING4FOOD:
+                for world_food in world_foodList:
+                    if _debugMode:
+                        print("update()>search => examining food")
+                    if calculateDistance(self.position, world_food.position) <= self.viewRange:
+                        self.cellState = state.GOING4FOOD
+                        self.target = world_food.position
+
+            elif self.state = state.SEARCING4PARNTER:
+                for world_cell in world_cellList:
+                    if _debugMode:
+                        print("update()>search => examining cell#", world_cell.id)
+                    if calculateDistance(self.position, world_cell.position) <= self.viewRange:
+                        print("FOUND PARTNER> IT'S BAD IMPLEMENTATION SINCE CELLS MOVE, SHOULD FIX THIS BEFORE CONTINUING WITH MATING CODE, see coments")
+                        #self.target should target id instead of position and keep track of the cell and if it goes out of sight.
+                        self.cellState = state.GOING4PARTNER
+                        self.target = world_cell.position
+
         
         elif self.cellState == state.GOING4FOOD  or self.cellState == state.GOING4PARTNER:
-            
+            dist = calculateDistance(self.position, self.target)
+            if  dist <= self.speed:
+                move(self.target)
+            else:
+                difX = abs(a[0]-b[0])
+                difY = abs(a[1]-b[1])
+                moveX = (difX * self.speed) / dist
+                moveY = (difY * self.speed) / dist
+                move((moveX,moveY))
+                if calculateDistance(self.position, self.target) <= 2:
+                    self.cellState = state.EATING
+                
+
+
             pass
             
