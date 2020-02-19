@@ -59,9 +59,8 @@ def main(width, height, fps):
                         if is_trying_to_quit(event):
                                 return
 
-
                 for c in world.cells:
-                        c.update()
+                        c.update(world.cells,world.foods)
                 draw_grid(screen,width,height)
                 pygame.display.update()
                 clock.tick(fps)
@@ -83,10 +82,9 @@ def draw_grid(surface, width, height):
                 #if cell._debugMode:
                 #        print("drawing: food at "+str(f.position))
                 pygame.draw.rect(surface, foodColor, pygame.Rect(f.position[0],f.position[1] , wofc, hofc))
-        print("loop")
         pygame.display.update()
 greeting_message()
 if cell._debugMode:
         print(colored('debugMode is enabled', 'yellow'))
 
-main(1000, 700, 5)
+main(1000, 700, 100)

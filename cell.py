@@ -3,6 +3,7 @@
 import enum
 import random
 import math
+import time
 from termcolor import colored
 #enable debug mode in order to get useful prints prints
 _debugMode = True
@@ -134,9 +135,8 @@ class Cell():
         pass
 
 
-    def update(self):
+    def update(self,world_cellList,world_foodList):
         print(colored("current state= "+str(self.cellState),'red'))
-        self.viewRange += 20
         def calculateDistance(a,b,self):
             return math.sqrt(abs(a[0]-b[0])**2 + abs(a[1] - b[1])**2)
             
@@ -156,13 +156,12 @@ class Cell():
                 self.move((0,(-1)*seedDistance))
             
             ###SCAN
-            world_cellList = []
-            world_foodList = []
             if self.cellState == state.SEARCING4FOOD:
                 for world_food in world_foodList:
                     if _debugMode:
                         print("update()>search => examining food")
                     if calculateDistance(self.position, world_food.position,self) <= self.viewRange:
+                        time.sleep(2)
                         self.cellState = state.GOING4FOOD
                         self.target = world_food.position
 
