@@ -3,10 +3,22 @@
 import pygame
 import math
 import time
-
 import world
+from termcolor import colored
 import cell
 import food
+
+def greeting_message():
+        print(colored('***************************************','cyan'))
+        print(colored('*   ==Welcome to the perfect-cell==   *','cyan'))
+        print(colored('*     Made by petarpetarpetar and     *','cyan'))
+        print(colored('*         Drakula44 with love         *','cyan'))
+        print(colored('*    If you are seeing this message   *','cyan'))
+        print(colored('*    It means you successfully ran    *','cyan'))
+        print(colored('*     the simulation, please star     *','cyan'))
+        print(colored('*  the repo and follow us on github   *','cyan'))
+        print(colored('***************************************','cyan'))
+
 
 def create_background(width, height):
         colors = [(255, 255, 255), (212, 212, 212)]
@@ -40,28 +52,41 @@ def main(width, height, fps):
         background = create_background(width, height)
         clock = pygame.time.Clock()
         the_world_is_a_happy_place = 0
-        world.init(1000,700,10,10)
+        world.init(width,height,1,1)
         while True:
                 the_world_is_a_happy_place += 1
                 for event in pygame.event.get():
                         if is_trying_to_quit(event):
                                 return
 
-                draw_grid(screen, )
-                pygame.display.flip()
+
+                for c in world.cells:
+                        c.update()
+                draw_grid(screen,width,height)
+                pygame.display.update()
                 clock.tick(fps)
+                
 
 
 def draw_grid(surface, width, height):
         background_color = (0,0,0)
         pygame.draw.rect(surface,background_color , pygame.Rect(0,0, width, height))
-        wofc = 2
-        hofc = 2
+        wofc = 5
+        hofc = 5
         cellColor = (255,0,0)
         foodColor = (0,255,0)
         for c in world.cells:
-                pygame.draw.rect(surface, cellColor, pygame.Rect(c.position[0]*wofc,c.position[1]*hofc , wofc, hofc))
+                #if cell._debugMode:
+                #        print("drawing: cell at "+str(c.position))
+                pygame.draw.rect(surface, cellColor, pygame.Rect(c.position[0],c.position[1] , wofc, hofc))
         for f in world.foods:
-                pygame.draw.rect(surface, foodColor, pygame.Rect(f.position[0]*wofc,f.position[1]*hofc , wofc, hofc))
+                #if cell._debugMode:
+                #        print("drawing: food at "+str(f.position))
+                pygame.draw.rect(surface, foodColor, pygame.Rect(f.position[0],f.position[1] , wofc, hofc))
+        print("loop")
+        pygame.display.update()
+greeting_message()
+if cell._debugMode:
+        print(colored('debugMode is enabled', 'yellow'))
 
-main(300, 300, 60)
+main(1000, 700, 5)

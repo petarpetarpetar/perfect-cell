@@ -3,8 +3,9 @@
 import enum
 import random
 import math
+from termcolor import colored
 #enable debug mode in order to get useful prints prints
-_debugMode = False
+_debugMode = True
 
 worldWidth = 1000
 worldHeight = 700
@@ -19,60 +20,82 @@ class state(enum.Enum):
     FIGHTING = 5
 
 class Cell():
+    
+    # @brief constructor for when a new cell is generated at the beggining of simulation (random gen era)
+    def __init__(self,position, dnk, id):
+        
+        self.id = id                        #id of a cell in order to keep track of numbers and identifying the cells
+        self.position = position            #current position of the cell
+        self.dnk = dnk                      #dnk sequence of a cell
+        self.age = 0                        #age of a cell (how much cycles it has lived)
+        self.energy = 80                    #energy of a cell (used for actions like: surviving next cycle, eating, searcing, moving...)
+        self.reporductionCount = 0          #how much generations has this cell already produced
+        self.target = None                  #cell is currently moving to target (food, or partner)
+        self.cellState = state.SEARCING4FOOD     #state of a cell (declared in an enum above the cell class)
+        self.viewRange = self.decode(0)          #a range of detection of other cells and food units 
+        self.speed = self.decode(1)              #speed(in tiles) which cell can move (greater speed requires greater energy spent)
+        self.matingScore = self.decode(2)        #starting mating score (yet to be declared if it's going to be in dnk or calculated using speed and age)
+        self.wantingScore = self.decode(3)       #wanting score for pair mating (hopefully represents races of cells)
+        self.maxAge = self.decode(4)             #age of cell and it's going to die if it doesn't have enough energy to expand it's max age
+        self.maxReproduction = self.decode(5)    #to stop over populating everything
+        print(colored('initialized cell#'+str(id),'yellow'))
+        print('cell position: '+str(self.position))
+        print(colored('cell DNK: '+self.dnk,'green'))
+    # @brief method for decoding values from dnk sequence to values inside cell
     def decode(self,decodeWhat):
         def dec_viewRange():
+            summ = 0
             dnkExtract = self.dnk[:4]
             for ch in dnkExtract:
-                self.viewRange += ord(ch) - 97
-            
+                summ += ord(ch) - 97
             if _debugMode:
-                print("assigned starting value to cell's viewRange = ", self.viewRange)
-            pass
+                print("assigned starting value to cell's viewRange = ", summ)
+            return summ
         
         def dec_speed():
+            summ = 0
             dnkExtract = self.dnk[4:8]
-
             for ch in dnkExtract:
-                self.speed += ord(ch) - 97
+                summ += ord(ch) - 97
             if _debugMode:
-                print("assigned starting value to cell's speed = ", self.speed)
-            pass
+                print("assigned starting value to cell's speed = ", summ)
+            return int(0.1 * summ)
 
         def dec_matingScore():
             dnkExtract = self.dnk[8:12]
-
+            summ = 0 
             for ch in dnkExtract:
-                self.matingScore += ord(ch) - 97
+                summ += ord(ch) - 97
             if _debugMode:
-                print("assigned starting value to cell's matingScore = ", self.matingScore)
-            pass
+                print("assigned starting value to cell's matingScore = ", summ)
+            return summ
 
         def dec_wantingScore():
             dnkExtract = self.dnk[12:16]
-
+            summ = 0
             for ch in dnkExtract:
-                self.wantingScore += ord(ch) - 97
+                summ += ord(ch) - 97
             if _debugMode:
-                print("assigned staring value to cell's wantingScore = ", self.wantingScore)
-            pass
+                print("assigned staring value to cell's wantingScore = ", summ)
+            return summ
 
         def dec_maxAge():
             dnkExtract = self.dnk[16:20]
-
+            summ = 0
             for ch in dnkExtract:
-                self.maxAge += ord(ch) - 97
+                summ += ord(ch) - 97
             if _debugMode:
-                print("assigned starting value to cell's maxAge = ", self.maxAge)
-            pass    
+                print("assigned starting value to cell's maxAge = ", summ)
+            return summ    
 
         def dec_maxReproduction():
             dnkExtract = self.dnk[20:24]
-
+            summ = 0
             for ch in dnkExtract:
-                self.maxReproduction += ord(ch) - 97
+                summ += ord(ch) - 97
             if _debugMode:
-                print("assigned starting value to cell's maxReproduction = ", self.maxReproduction)
-            pass
+                print("assigned starting value to cell's maxReproduction = ", summ)
+            return summ
 
         switcher = {
             0:dec_viewRange,
@@ -84,25 +107,6 @@ class Cell():
         }        
         func = switcher.get(decodeWhat, lambda : 'invalid decodeWhat')
         return func()
-    # @brief constructor for when a new cell is generated at the beggining of simulation (random gen era)
-    def __init__(self,position, dnk, id):
-        self.id = id                        #id of a cell in order to keep track of numbers and identifying the cells
-        self.position = position            #current position of the cell
-        self.dnk = dnk                      #dnk sequence of a cell
-        self.age = 0                        #age of a cell (how much cycles it has lived)
-        self.energy = 80                    #energy of a cell (used for actions like: surviving next cycle, eating, searcing, moving...)
-        self.reporductionCount = 0          #how much generations has this cell already produced
-        self.target = None                  #cell is currently moving to target (food, or partner)
-        self.cellState = state.NULL         #state of a cell (declared in an enum above the cell class)
-        self.viewRange = self.decode(0)          #a range of detection of other cells and food units 
-        self.speed = self.decode(1)              #speed(in tiles) which cell can move (greater speed requires greater energy spent)
-        self.matingScore = self.decode(2)        #starting mating score (yet to be declared if it's going to be in dnk or calculated using speed and age)
-        self.wantingScore = self.decode(3)       #wanting score for pair mating (hopefully represents races of cells)
-        self.maxAge = self.decode(4)             #age of cell and it's going to die if it doesn't have enough energy to expand it's max age
-        self.maxReproduction = self.decode(5)    #to stop over populating everything
-
-    # @brief method for decoding values from dnk sequence to values inside cell
-    
 
     # @brief determinating how the cell moves
     def move(self,movePos):
@@ -120,9 +124,9 @@ class Cell():
         self.position[0] += movePos[0]
         self.position[1] += movePos[1]
 
-        self.energy -= movePos[0]**2 + movePos[1]**2
+        self.energy -= 0.05 * (movePos[0]**2 + movePos[1]**2)
         if _debugMode:
-            print("move(movePos): energy reduced by:",movePos[0]**2 + movePos[1]**2)
+            print("move(movePos): energy reduced by:",0.05 * (movePos[0]**2 + movePos[1]**2))
         return True
 
     def eat(self,food):
@@ -131,7 +135,8 @@ class Cell():
 
 
     def update(self):
-
+        print(colored("current state= "+str(self.cellState),'red'))
+        self.viewRange += 20
         def calculateDistance(a,b,self):
             return math.sqrt(abs(a[0]-b[0])**2 + abs(a[1] - b[1])**2)
             
@@ -139,16 +144,16 @@ class Cell():
             seedDirection = random.randint(1,4)
             seedDistance = random.randint(0,self.speed)
             if seedDirection == 1:
-                self.move((self.speed, 0))
+                self.move((seedDistance, 0))
             
             elif seedDirection == 2:
-                self.move((0, self.speed))
+                self.move((0, seedDistance))
             
             elif seedDirection == 3:
-                self.move(((-1)*self.speed,0))
+                self.move(((-1)*seedDistance,0))
             
             elif seedDirection == 4: 
-                self.move((0,(-1)*self.speed))
+                self.move((0,(-1)*seedDistance))
             
             ###SCAN
             world_cellList = []
@@ -166,7 +171,7 @@ class Cell():
                     if _debugMode:
                         print("update()>search => examining cell#", world_cell.id)
                     if calculateDistance(self.position, world_cell.position,self) <= self.viewRange:
-                        print("WARNING: FOUND PARTNER> IT'S BAD IMPLEMENTATION SINCE CELLS MOVE, SHOULD FIX THIS BEFORE CONTINUING WITH MATING CODE, see coments")
+                        print(colored("WARNING: partner finding is not implemented fully, should look at the coments before making any further improvements",'red',attrs=['bold']))
                         #self.target should target id instead of position and keep track of the cell and if it goes out of sight. check mating score.
                         self.cellState = state.GOING4PARTNER
                         self.target = world_cell.position
@@ -185,5 +190,3 @@ class Cell():
                 if calculateDistance(self.position, self.target,self) <= 2:
                     self.cellState = state.EATING
             pass
-            
-print("radi")   

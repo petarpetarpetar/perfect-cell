@@ -8,7 +8,7 @@ width = 0
 height = 0
 cells = []
 foods = []
-
+cellCount = 0
 def randomDNK(size):
     chars = string.ascii_lowercase
     return ''.join(random.choice(chars) for i in range(size))
@@ -17,12 +17,14 @@ def randomDNK(size):
 #
 #
 def init(w, h, nc, nf):
+    global cellCount
     weight = w
-    height = h;
-    for i in range(nc):
+    height = h
+    for _ in range(nc):
         position = [random.randrange(w),random.randrange(h)]
-        cells.append(cell.Cell(randomDNK(24),position))
-    for i in range(nf):
+        cells.append(cell.Cell(position,randomDNK(24),cellCount))
+        cellCount += 1
+    for _ in range(nf):
         position = [random.randrange(w),random.randrange(h)]
         foods.append(food.Food(position))
 
