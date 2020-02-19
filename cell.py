@@ -6,7 +6,7 @@ import math
 import time
 from termcolor import colored
 #enable debug mode in order to get useful prints prints
-_debugMode = True
+_debugMode = False
 
 worldWidth = 1000
 worldHeight = 700
@@ -39,6 +39,8 @@ class Cell():
         self.wantingScore = self.decode(3)       #wanting score for pair mating (hopefully represents races of cells)
         self.maxAge = self.decode(4)             #age of cell and it's going to die if it doesn't have enough energy to expand it's max age
         self.maxReproduction = self.decode(5)    #to stop over populating everything
+        self.eatingTime = 0
+        self.eatingFoodId = 0
         print(colored('initialized cell#'+str(id),'yellow'))
         print('cell position: '+str(self.position))
         print(colored('cell DNK: '+self.dnk,'green'))
@@ -118,7 +120,7 @@ class Cell():
         
         if not(0 < self.position[1]  + movePos[1] < worldHeight):
             if _debugMode:
-                print("cell.mvoe(movePos) => cell has hit a vertical wall")
+                print("cell.move(movePos) => cell has hit a vertical wall")
             return False
         pass
 
@@ -127,7 +129,7 @@ class Cell():
 
         self.energy -= 0.05 * (movePos[0]**2 + movePos[1]**2)
         if _debugMode:
-            print("move(movePos): energy reduced by:",0.05 * (movePos[0]**2 + movePos[1]**2))
+            print("cell.move(movePos): energy reduced by:",0.05 * (movePos[0]**2 + movePos[1]**2))
         return True
 
     def eat(self,food):
@@ -137,6 +139,7 @@ class Cell():
 
     def update(self,world_cellList,world_foodList):
         print(colored("current state= "+str(self.cellState),'red'))
+        self.viewRange += 10
         def calculateDistance(a,b,self):
             return math.sqrt(abs(a[0]-b[0])**2 + abs(a[1] - b[1])**2)
             
@@ -156,14 +159,21 @@ class Cell():
                 self.move((0,(-1)*seedDistance))
             
             ###SCAN
+
             if self.cellState == state.SEARCING4FOOD:
+                temp = -1
                 for world_food in world_foodList:
+                    temp += 1
+                    if not(world_food.live):
+                        continue
                     if _debugMode:
                         print("update()>search => examining food")
                     if calculateDistance(self.position, world_food.position,self) <= self.viewRange:
-                        time.sleep(2)
                         self.cellState = state.GOING4FOOD
                         self.target = world_food.position
+                        world_food.live = False
+                        self.eatingTime = 1
+                        self.eatingFoodId = temp
 
             elif self.cellState == state.SEARCING4PARNTER:
                 for world_cell in world_cellList:
@@ -185,7 +195,19 @@ class Cell():
                 difY = abs(self.position[1]-self.target[1])
                 moveX = (difX * self.speed) / dist
                 moveY = (difY * self.speed) / dist
-                self.move((moveX,moveY))
-                if calculateDistance(self.position, self.target,self) <= 2:
+                dirKoefX = -1
+                dirKoefY = -1 
+                if self.position[0] < self.target[0]:
+                    dirKoefX *= -1
+                if self.position[1] < self.target[1]:
+                    dirKoefY *= -1 
+                    
+                self.move((dirKoefX * moveX,dirKoefY * moveY))
+                if calculateDistance(self.position, self.target,self) <= 10:
                     self.cellState = state.EATING
             pass
+
+        elif self.cellState == state.EATING:
+            self.eatingTime += 1
+            if self.eatingTime > 10:
+                self.eat(world_foodList[self.eatingFoodId-1])

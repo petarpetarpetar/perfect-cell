@@ -52,7 +52,7 @@ def main(width, height, fps):
         background = create_background(width, height)
         clock = pygame.time.Clock()
         the_world_is_a_happy_place = 0
-        world.init(width,height,1,1)
+        world.init(width,height,10,5)
         while True:
                 the_world_is_a_happy_place += 1
                 for event in pygame.event.get():
@@ -61,6 +61,13 @@ def main(width, height, fps):
 
                 for c in world.cells:
                         c.update(world.cells,world.foods)
+                        if c.cellState != cell.state.EATING:
+                                print(colored("cell energy= "+str(c.energy),'green'))
+                        if c.energy < 0:
+                                world.cells.remove(c)
+
+
+
                 draw_grid(screen,width,height)
                 pygame.display.update()
                 clock.tick(fps)
@@ -87,4 +94,4 @@ greeting_message()
 if cell._debugMode:
         print(colored('debugMode is enabled', 'yellow'))
 
-main(1000, 700, 100)
+main(1000, 700, 500)
