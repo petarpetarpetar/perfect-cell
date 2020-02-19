@@ -40,7 +40,7 @@ def main(width, height, fps):
         background = create_background(width, height)
         clock = pygame.time.Clock()
         the_world_is_a_happy_place = 0
-        world.init(100,100)
+        world.init(1000,700,10,10)
         while True:
                 the_world_is_a_happy_place += 1
                 for event in pygame.event.get():
