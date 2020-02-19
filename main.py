@@ -4,8 +4,9 @@ import pygame
 import math
 import time
 
-
-
+import world
+import cell
+import food
 
 def create_background(width, height):
         colors = [(255, 255, 255), (212, 212, 212)]
@@ -36,38 +37,31 @@ def is_trying_to_quit(event):
 def main(width, height, fps):
         pygame.init()
         screen = pygame.display.set_mode((width, height))
-        pygame.display.set_caption('press space to see next demo')
         background = create_background(width, height)
         clock = pygame.time.Clock()
         the_world_is_a_happy_place = 0
-        grid = []
-        for i in range(10):
-            grid.append([])
-            for j in range(10):
-                grid[i].append((i+j)%10)
-        print(grid)
+        world.init(100,100)
         while True:
                 the_world_is_a_happy_place += 1
                 for event in pygame.event.get():
                         if is_trying_to_quit(event):
                                 return
-                draw_grid(screen, grid)
+
+                draw_grid(screen, )
                 pygame.display.flip()
                 clock.tick(fps)
 
 
-def draw_grid(surface, grid):
-        width = 30
-        height = 30
-        color = (128, 0, 128) # purple
-        for i in range( len( grid ) ):
-            for j in  range( len( grid[0] ) ):
-                if grid[i][j] == 1:
-                    color = (255,255,255)
-                elif grid[i][j] == 2:
-                    color = (0,0,0)
-                else:
-                    color = (100,100,100)
-                pygame.draw.rect(surface, color, pygame.Rect(i*width,j*height , width, height))
+def draw_grid(surface, width, height):
+        background_color = (0,0,0)
+        pygame.draw.rect(surface,background_color , pygame.Rect(0,0, width, height))
+        wofc = 2
+        hofc = 2
+        cellColor = (255,0,0)
+        foodColor = (0,255,0)
+        for c in world.cells:
+                pygame.draw.rect(surface, cellColor, pygame.Rect(c.position[0]*wofc,c.position[1]*hofc , wofc, hofc))
+        for f in world.foods:
+                pygame.draw.rect(surface, foodColor, pygame.Rect(f.position[0]*wofc,f.position[1]*hofc , wofc, hofc))
 
 main(300, 300, 60)
